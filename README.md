@@ -1,2 +1,2 @@
 # rust_nn
-Neural net implementation from scratch.
+Iimplementation Neural net from scratch in Rust.
