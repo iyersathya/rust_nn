@@ -63,7 +63,7 @@ fn loss(X: &[[f64; 2]; 100], y: &[f64], model: &MLP, batch_size: usize) -> (Valu
 }
 
 fn main() {
-    let model = MLP::new(2, &[32, 32, 1]);
+    let model = MLP::new(2, &[8, 8, 1]);
     println!("number of parameters {}", model.parameters().len());
     let X = get_X();
     let Y = get_Y();
@@ -77,7 +77,7 @@ fn main() {
     // optimization loop
     for i in 0..100 {
         // Step1: Forward
-        let (total_loss, acc) = loss(&X, &Y, &model, 12);
+        let (total_loss, acc) = loss(&X, &Y, &model, 32);
 
         // Step2: backward
         model.zero_grad();

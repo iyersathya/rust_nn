@@ -10,7 +10,11 @@ pub struct Layer {
 impl Layer {
     pub fn new(nin: usize, nout: usize, nonlin: bool) -> Layer {
         Layer {
-            neurons: Rc::new((0..nout).map(|_| Neuron::new(nin, nonlin)).collect()),
+            neurons: Rc::new(
+                (0..nout)
+                    .map(|l| Neuron::new(nin, nonlin, l as f64 + 0.1))
+                    .collect(),
+            ),
         }
     }
 

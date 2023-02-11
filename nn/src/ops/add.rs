@@ -71,3 +71,28 @@ impl Add<Value> for f64 {
         other.add(rhs)
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn test_add_values() {
+        let x = Value::newd(3.0, "x".to_string());
+        let y = Value::newd(3.0, "y".to_string());
+
+        let mut z = x.clone() + y.clone();
+        z.set_label("z");
+        assert_eq!(*(*z.data).borrow(), 6.0);
+        z = z.clone() + Value::newd(3.0, "".to_string());
+        assert_eq!(*(*z.data).borrow(), 9.0);
+        println!(" z:{:#?}", z);
+        let zz = z + 1.0;
+        assert_eq!(*(*zz.data).borrow(), 10.0);
+        let zz = 1.0 + zz;
+        assert_eq!(*(*zz.data).borrow(), 11.0);
+        zz.backward();
+        println!(" z:{:#?}", zz);
+        assert_eq!(*(*x.clone().grad).borrow(), 1.0);
+        assert_eq!(*(*y.clone().grad).borrow(), 1.0);
+    }
+}

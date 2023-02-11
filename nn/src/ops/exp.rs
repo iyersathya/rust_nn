@@ -32,3 +32,8 @@ impl Value {
         out
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+}

@@ -34,3 +34,10 @@ impl Value {
         out
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn test_tanh() {}
+}

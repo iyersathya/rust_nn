@@ -72,3 +72,31 @@ impl Neg for Value {
         self * -1.0
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn test_sub_values() {
+        let x = Value::newd(3.0, "x".to_string());
+        let y = Value::newd(5.0, "y".to_string());
+        // let z = x.add(&y);
+        let z = x.clone() - y.clone();
+        z.set_label("z");
+        assert_eq!(*(*z.data).borrow(), -2.0);
+        let z1 = z.clone() - Value::newd(8.0, "".to_string());
+        z1.set_label("z1");
+        assert_eq!(*(*z1.clone().data).borrow(), -10.0);
+        println!(" z1:{:#?}", z1);
+        let zz1 = z1 - 1.0;
+        zz1.set_label("zz1");
+        assert_eq!(*(*zz1.data).borrow(), -11.0);
+        let zz2 = 1.0 - zz1;
+        zz2.set_label("zz2");
+        assert_eq!(*(*zz2.data).borrow(), 12.0);
+        zz2.backward();
+        println!(" z:{:#?}", zz2);
+        assert_eq!(*(*x.clone().grad).borrow(), -1.0);
+        assert_eq!(*(*y.clone().grad).borrow(), 1.0);
+    }
+}

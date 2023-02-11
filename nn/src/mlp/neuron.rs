@@ -11,14 +11,14 @@ pub struct Neuron {
 }
 
 impl Neuron {
-    pub fn new(nin: usize, nonlin: bool) -> Neuron {
+    pub fn new(nin: usize, nonlin: bool, l: f64) -> Neuron {
         let mut rng = rand::thread_rng();
         let w = Rc::new(
             (0..nin)
                 .map(|i| {
                     Value::new(
-                        rng.gen_range(-1.0..1.0),
-                        // 0.1 * i as f64 * l as f64,
+                        // rng.gen_range(-1.0..1.0),
+                        0.1 * i as f64 * l as f64,
                         vec![],
                         "".to_string(),
                         format!("w{}", i),
@@ -64,7 +64,7 @@ mod test {
 
     #[test]
     fn test_neuron() {
-        let neuron = Neuron::new(3, true);
+        let neuron = Neuron::new(3, true, 0.1);
         let output = neuron.call(Value::vec(&[1.0, 2.0, 3.0]));
         output.backward();
         println!("meuron output: {:#?}", output);

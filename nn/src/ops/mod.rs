@@ -1,7 +1,6 @@
 mod add;
 mod div;
 mod exp;
-mod module;
 mod mul;
 mod pow;
 mod relu;

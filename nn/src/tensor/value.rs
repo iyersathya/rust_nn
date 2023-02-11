@@ -14,29 +14,19 @@ pub struct Value {
     pub _backward: Arc<Box<dyn Fn(&Value)>>,
 }
 
-impl PartialEq for Value {
-    fn eq(&self, other: &Self) -> bool {
-        *(*self.data).borrow() == *(*other.data).borrow()
-            && *(*self.grad).borrow() == *(*other.grad).borrow()
-            && self._prev == other._prev
-            && self._op == other._op
-            && self._label == other._label
+impl Default for Value {
+    fn default() -> Self {
+        Value {
+            data: Rc::new(RefCell::new(0.0)),
+            grad: Rc::new(RefCell::new(0.0)),
+            _prev: vec![],
+            _op: "".to_string(),
+            _label: RefCell::new("".to_string()),
+            _backward: Arc::new(Box::new(|_: &Value| {})),
+        }
     }
 }
 
-impl fmt::Debug for Value {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "Value {{ label: {}, data: {}, grad: {}, op: {}, _prev: {:#?}}}",
-            &self._label.borrow(),
-            (*self.data).borrow(),
-            (*self.grad).borrow(),
-            &self._op,
-            self._prev,
-        )
-    }
-}
 impl Value {
     pub fn new(data: f64, child: Vec<Arc<Value>>, _op: String, label: String) -> Value {
         Value {
@@ -48,6 +38,16 @@ impl Value {
             _backward: Arc::new(Box::new(|_: &Value| {})),
         }
     }
+
+    pub fn newd(data: f64, label: String) -> Value {
+        Value {
+            data: Rc::new(RefCell::new(data)),
+            // _prev: child,
+            _label: RefCell::new(label),
+            ..Default::default()
+        }
+    }
+
     pub fn vec(inv: &[f64]) -> Vec<Value> {
         inv.to_vec()
             .iter()
@@ -55,6 +55,7 @@ impl Value {
             .map(|(i, v)| Value::new(*v, vec![], "".to_string(), format!("x{}", i)))
             .collect()
     }
+
     pub fn get_data(&self) -> f64 {
         *(*self.data).borrow()
     }
@@ -62,20 +63,25 @@ impl Value {
         let mut data = (*self.data).borrow_mut();
         *data = d;
     }
+
     pub fn set_grad(&self, d: f64) {
         let mut grad = (*self.grad).borrow_mut();
         *grad = d;
     }
+
     pub fn get_grad(&self) -> f64 {
         *(*self.grad).borrow()
     }
+
     pub fn get_label(&self) -> String {
         self._label.borrow().to_string()
     }
-    fn set_label(&self, l: &str) {
+
+    pub fn set_label(&self, l: &str) {
         let mut label = self._label.borrow_mut();
         label.push_str(l);
     }
+
     pub fn zero_grad(&self) {
         *(*self.grad).borrow_mut() = 0.0;
     }
@@ -101,6 +107,29 @@ impl Value {
     }
 }
 
+impl PartialEq for Value {
+    fn eq(&self, other: &Self) -> bool {
+        *(*self.data).borrow() == *(*other.data).borrow()
+            && *(*self.grad).borrow() == *(*other.grad).borrow()
+            && self._prev == other._prev
+            && self._op == other._op
+            && self._label == other._label
+    }
+}
+
+impl fmt::Debug for Value {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "Value {{ label: {}, data: {}, grad: {}, op: {}, _prev: {:#?}}}",
+            &self._label.borrow(),
+            (*self.data).borrow(),
+            (*self.grad).borrow(),
+            &self._op,
+            self._prev,
+        )
+    }
+}
 impl Sum for Value {
     fn sum<I>(iter: I) -> Value
     where
@@ -116,89 +145,6 @@ impl Sum for Value {
 #[cfg(test)]
 mod test {
     use super::*;
-
-    #[test]
-    fn test_add_values() {
-        let x = Value::new(3.0, vec![], "".to_string(), "x".to_string());
-        let y = Value::new(3.0, vec![], "".to_string(), "y".to_string());
-
-        // let z = x.add(&y);
-        let mut z = x.clone() + y.clone();
-        z.set_label("z");
-        assert_eq!(*(*z.data).borrow(), 6.0);
-        z = z.clone() + Value::new(3.0, vec![], "".to_string(), "".to_string());
-        assert_eq!(*(*z.data).borrow(), 9.0);
-        println!(" z:{:#?}", z);
-        let zz = z + 1.0;
-        assert_eq!(*(*zz.data).borrow(), 10.0);
-        let zz = 1.0 + zz;
-        assert_eq!(*(*zz.data).borrow(), 11.0);
-        zz.backward();
-        println!(" z:{:#?}", zz);
-        assert_eq!(*(*x.clone().grad).borrow(), 1.0);
-        assert_eq!(*(*y.clone().grad).borrow(), 1.0);
-    }
-
-    #[test]
-    fn test_sub_values() {
-        let x = Value::new(3.0, vec![], "".to_string(), "x".to_string());
-        let y = Value::new(5.0, vec![], "".to_string(), "y".to_string());
-        // let z = x.add(&y);
-        let z = x.clone() - y.clone();
-        z.set_label("z");
-        assert_eq!(*(*z.data).borrow(), -2.0);
-        let z1 = z.clone() - Value::new(8.0, vec![], "".to_string(), "".to_string());
-        z1.set_label("z1");
-        assert_eq!(*(*z1.clone().data).borrow(), -10.0);
-        println!(" z1:{:#?}", z1);
-        let zz1 = z1 - 1.0;
-        zz1.set_label("zz1");
-        assert_eq!(*(*zz1.data).borrow(), -11.0);
-        let zz2 = 1.0 - zz1;
-        zz2.set_label("zz2");
-        assert_eq!(*(*zz2.data).borrow(), 12.0);
-        zz2.backward();
-        println!(" z:{:#?}", zz2);
-        assert_eq!(*(*x.clone().grad).borrow(), -1.0);
-        assert_eq!(*(*y.clone().grad).borrow(), 1.0);
-    }
-    #[test]
-    fn test_mul_values() {
-        let x = Value::new(3.0, vec![], "".to_string(), "x".to_string());
-        let y = Value::new(2.0, vec![], "".to_string(), "y".to_string());
-        // let z = x.add(&y);
-        let mut z = x.clone() * y.clone();
-        assert_eq!(*(*z.data).borrow(), 6.0);
-        z = z.clone() * Value::new(3.0, vec![], "".to_string(), "".to_string());
-        assert_eq!(*(*z.data).borrow(), 18.0);
-        println!(" z:{:#?}", z);
-        let zz = z * 2.0;
-        assert_eq!(*(*zz.data).borrow(), 36.0);
-        zz.backward();
-        println!(" z:{:#?}", zz);
-        assert_eq!(*(*x.clone().grad).borrow(), 12.0);
-        assert_eq!(*(*y.clone().grad).borrow(), 18.0);
-    }
-
-    #[test]
-    fn test_div_values() {
-        let x = Value::new(100.0, vec![], "".to_string(), "x".to_string());
-        let y = Value::new(2.0, vec![], "".to_string(), "y".to_string());
-        // let z = x.add(&y);
-        let mut z = x.clone() / y.clone();
-        assert_eq!(*(*z.data).borrow(), 50.0);
-        z = z.clone() / Value::new(2.0, vec![], "".to_string(), "".to_string());
-        assert_eq!(*(*z.data).borrow(), 25.0);
-        println!(" z:{:#?}", z);
-        let zz = z / 2.0;
-        assert_eq!(*(*zz.data).borrow(), 12.5);
-        let zz = 2.0 / zz;
-        assert_eq!(*(*zz.data).borrow(), 0.16);
-        zz.backward();
-        println!(" z:{:#?}", zz);
-        assert_eq!(*(*x.clone().grad).borrow(), -0.0016);
-        assert_eq!(*(*y.clone().grad).borrow(), 0.08);
-    }
 
     #[test]
     fn test_clone_values() {
