@@ -68,7 +68,10 @@ mod test {
         let output = mlp.call(&x);
         output.backward();
         println!("output: {:?}", output);
-        print_params(&mlp.parameters());
+        let params = mlp.parameters();
+        print_params(&params);
+        let cal_params = ((2 * 4) + 4) + ((4 * 4) + 4) + (4 + 1);
+        assert_eq!(params.len(), cal_params);
     }
 
     #[test]
@@ -106,8 +109,12 @@ mod test {
             loss_v.push(loss.get_data());
             // println!("loss : {:?}", loss.get_data());
         }
-        // print_params(&mlp.parameters());
-        // println!("loss : {:?}", loss_v);
+
+        let params = mlp.parameters();
+        print_params(&params);
+        let cal_params = ((3 * 4) + 4) + ((4 * 4) + 4) + (4 + 1);
+        assert_eq!(params.len(), cal_params);
+
         ys.iter().for_each(|y| println!("Actual :{}", y));
         ypred
             .iter()

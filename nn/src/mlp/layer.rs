@@ -50,7 +50,9 @@ mod test {
             o.backward();
             println!("layer output : {:#?}", o);
         }
-        print_params(&layer.parameters());
+        let params = layer.parameters();
+        print_params(&params);
+        assert_eq!(params.len(), 4 * 5 + 5);
     }
 
     #[test]
@@ -62,6 +64,8 @@ mod test {
             o.backward();
             println!("layer output : {:#?}", o);
         }
-        print_params(&layer.parameters());
+        let params = layer.parameters();
+        print_params(&params);
+        assert_eq!(params.len(), 10 * 10 + 10);
     }
 }

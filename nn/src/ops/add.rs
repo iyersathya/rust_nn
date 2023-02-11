@@ -17,7 +17,7 @@ fn add_backward(out: &Value) {
         x._label.borrow(),
         grad_x
     );
-    println!(
+    debug!(
         "add_backwards({}) label {} grad {}",
         out._label.borrow(),
         y._label.borrow(),
