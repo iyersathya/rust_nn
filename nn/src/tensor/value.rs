@@ -9,7 +9,7 @@ pub struct Value {
     pub data: Rc<RefCell<f64>>,
     pub grad: Rc<RefCell<f64>>,
     pub _prev: Vec<Arc<Value>>,
-    pub _op: Rc<String>,
+    pub _op: String,
     pub _label: RefCell<String>,
     pub _backward: Arc<Box<dyn Fn(&Value)>>,
 }
@@ -20,7 +20,7 @@ impl Default for Value {
             data: Rc::new(RefCell::new(0.0)),
             grad: Rc::new(RefCell::new(0.0)),
             _prev: vec![],
-            _op: Rc::new("".to_string()),
+            _op: "".to_string(),
             _label: RefCell::new("".to_string()),
             _backward: Arc::new(Box::new(|_: &Value| {})),
         }
@@ -33,7 +33,7 @@ impl Value {
             data: Rc::new(RefCell::new(data)),
             grad: Rc::new(RefCell::new(0.0)),
             _prev: child,
-            _op: Rc::new(_op),
+            _op,
             _label: RefCell::new(label),
             _backward: Arc::new(Box::new(|_: &Value| {})),
         }
