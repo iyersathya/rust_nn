@@ -45,19 +45,23 @@ mod test {
     fn test_div_values() {
         let x = Value::newd(100.0, "x".to_string());
         let y = Value::newd(2.0, "y".to_string());
-        // let z = x.add(&y);
+
         let mut z = x.clone() / y.clone();
-        assert_eq!(*(*z.data).borrow(), 50.0);
+        assert_eq!(z.get_data(), 50.0);
+
         z = z.clone() / Value::newd(2.0, "".to_string());
-        assert_eq!(*(*z.data).borrow(), 25.0);
+        assert_eq!(z.get_data(), 25.0);
+
         println!(" z:{:#?}", z);
         let zz = z / 2.0;
-        assert_eq!(*(*zz.data).borrow(), 12.5);
+
+        assert_eq!(zz.get_data(), 12.5);
         let zz = 2.0 / zz;
-        assert_eq!(*(*zz.data).borrow(), 0.16);
+        assert_eq!(zz.get_data(), 0.16);
+
         zz.backward();
         println!(" z:{:#?}", zz);
-        assert_eq!(*(*x.clone().grad).borrow(), -0.0016);
-        assert_eq!(*(*y.clone().grad).borrow(), 0.08);
+        assert_eq!(x.get_grad(), -0.0016);
+        assert_eq!(y.get_grad(), 0.08);
     }
 }

@@ -6,22 +6,21 @@ use std::sync::Arc;
 fn sub_backward(out: &Value) {
     let x = out._prev.get(0).unwrap();
     let y = out._prev.get(1).unwrap();
-    let mut grad_x = (*x.grad).borrow_mut();
-    let mut grad_y = (*y.grad).borrow_mut();
-    *grad_x -= *(*out.grad).borrow();
-    *grad_y -= *(*out.grad).borrow();
+
+    x.set_grad(x.get_grad() - out.get_grad());
+    y.set_grad(y.get_grad() - out.get_grad());
 
     debug!(
         "sub_backwards({}) label {} grad {}",
-        out._label.borrow(),
-        x._label.borrow(),
-        grad_x
+        out.get_label(),
+        x.get_label(),
+        x.get_grad()
     );
     debug!(
         "sub_backwards({}) label {} grad {}",
-        out._label.borrow(),
-        y._label.borrow(),
-        grad_y
+        out.get_label(),
+        y.get_label(),
+        y.get_grad()
     );
 }
 
@@ -41,13 +40,8 @@ impl Sub<Value> for Value {
 }
 impl SubAssign<Value> for Value {
     fn sub_assign(&mut self, other: Self) {
-        let mut grad = (*self.grad).borrow_mut();
-        let mut data = (*self.data).borrow_mut();
-        let o_grad = *(*other.grad).borrow();
-        let o_data = *(*other.data).borrow();
-
-        *data -= o_data;
-        *grad -= o_grad;
+        self.set_data(self.get_data() - other.get_data());
+        self.set_grad(self.get_grad() - other.get_grad());
 
         self._backward = Arc::new(Box::new(sub_backward));
     }
@@ -83,20 +77,20 @@ mod test {
         // let z = x.add(&y);
         let z = x.clone() - y.clone();
         z.set_label("z");
-        assert_eq!(*(*z.data).borrow(), -2.0);
+        assert_eq!(z.get_data(), -2.0);
         let z1 = z.clone() - Value::newd(8.0, "".to_string());
         z1.set_label("z1");
-        assert_eq!(*(*z1.clone().data).borrow(), -10.0);
+        assert_eq!(z1.get_data(), -10.0);
         println!(" z1:{:#?}", z1);
         let zz1 = z1 - 1.0;
         zz1.set_label("zz1");
-        assert_eq!(*(*zz1.data).borrow(), -11.0);
+        assert_eq!(zz1.get_data(), -11.0);
         let zz2 = 1.0 - zz1;
         zz2.set_label("zz2");
-        assert_eq!(*(*zz2.data).borrow(), 12.0);
+        assert_eq!(zz2.get_data(), 12.0);
         zz2.backward();
         println!(" z:{:#?}", zz2);
-        assert_eq!(*(*x.clone().grad).borrow(), -1.0);
-        assert_eq!(*(*y.clone().grad).borrow(), 1.0);
+        assert_eq!(x.get_grad(), -1.0);
+        assert_eq!(y.get_grad(), 1.0);
     }
 }

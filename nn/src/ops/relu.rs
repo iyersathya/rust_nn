@@ -4,28 +4,25 @@ use std::sync::Arc;
 
 fn relu_backward(out: &Value) {
     let x = out._prev.get(0).unwrap();
-    let mut grad_x = (*x.grad).borrow_mut();
-    let t = *(*out.data).borrow();
-    let grad_out = *(*out.grad).borrow();
+    let t = out.get_data();
+    let grad_out = out.get_grad();
     if t > 0.0 {
-        *grad_x += grad_out;
-        // X.grad.set(grad_x + t * out.grad.get());
+        x.set_grad(x.get_grad() + grad_out);
     }
     debug!(
         "relu_backwards({}) label {} grad {}",
-        out._label.borrow(),
-        x._label.borrow(),
-        grad_x
+        out.get_label(),
+        x.get_label(),
+        x.get_grad()
     );
 }
 impl Value {
     pub fn relu(self) -> Value {
-        let mut x = (*self.data).borrow_mut();
-        if *x < 0.0 {
-            *x = 0.0;
+        if self.get_data() < 0.0 {
+            self.set_data(0.0)
         }
         let mut out = Value::new(
-            *x,
+            self.get_data(),
             vec![Arc::new(self.clone())],
             "relu".to_string(),
             "".to_string(),

@@ -4,23 +4,20 @@ use std::sync::Arc;
 
 fn exp_backward(out: &Value) {
     let x = out._prev.get(0).unwrap();
-    let mut grad_x = (*x.grad).borrow_mut();
 
-    let data_out = *(*out.data).borrow();
-    let grad_out = *(*out.grad).borrow();
-    *grad_x += data_out * grad_out;
+    x.set_grad(x.get_grad() + out.get_data() * out.get_grad());
 
     debug!(
         "exp_backwards({}) label {} grad {}",
-        out._label.borrow(),
-        x._label.borrow(),
-        grad_x
+        out.get_label(),
+        x.get_label(),
+        x.get_grad()
     );
 }
 
 impl Value {
     pub fn exp(self) -> Value {
-        let x = *(*self.data).borrow();
+        let x = self.get_data();
         let exp = f64::exp(x);
         let mut out = Value::new(
             exp,

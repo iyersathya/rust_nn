@@ -6,29 +6,28 @@ use std::sync::Arc;
 fn add_backward(out: &Value) {
     let x = out._prev.get(0).unwrap();
     let y = out._prev.get(1).unwrap();
-    let mut grad_x = (*x.grad).borrow_mut();
-    let mut grad_y = (*y.grad).borrow_mut();
-    *grad_x += *(*out.grad).borrow();
-    *grad_y += *(*out.grad).borrow();
+
+    x.set_grad(x.get_grad() + out.get_grad());
+    y.set_grad(y.get_grad() + out.get_grad());
 
     debug!(
         "add_backwards({}) label {} grad {}",
-        out._label.borrow(),
-        x._label.borrow(),
-        grad_x
+        out.get_label(),
+        x.get_label(),
+        x.get_grad()
     );
     debug!(
         "add_backwards({}) label {} grad {}",
-        out._label.borrow(),
-        y._label.borrow(),
-        grad_y
+        out.get_label(),
+        x.get_label(),
+        y.get_grad()
     );
 }
 
 impl Value {
     pub fn add(self, other: Value) -> Value {
         let mut out = Value::new(
-            *(*self.data).borrow() + *(*other.data).borrow(),
+            self.get_data() + other.get_data(),
             vec![Arc::new(self.clone()), Arc::new(other.clone())],
             "+".to_string(),
             "".to_string(),
@@ -47,13 +46,8 @@ impl Add<Value> for Value {
 }
 impl AddAssign<Value> for Value {
     fn add_assign(&mut self, other: Self) {
-        let mut grad = (*self.grad).borrow_mut();
-        let mut data = (*self.data).borrow_mut();
-        let o_grad = *(*other.grad).borrow();
-        let o_data = *(*other.data).borrow();
-
-        *data += o_data;
-        *grad += o_grad;
+        self.set_data(self.get_data() + other.get_data());
+        self.set_grad(self.get_grad() + other.get_grad());
         self._backward = Arc::new(Box::new(add_backward));
     }
 }
@@ -82,17 +76,17 @@ mod test {
 
         let mut z = x.clone() + y.clone();
         z.set_label("z");
-        assert_eq!(*(*z.data).borrow(), 6.0);
+        assert_eq!(z.get_data(), 6.0);
         z = z.clone() + Value::newd(3.0, "".to_string());
-        assert_eq!(*(*z.data).borrow(), 9.0);
+        assert_eq!(z.get_data(), 9.0);
         println!(" z:{:#?}", z);
         let zz = z + 1.0;
-        assert_eq!(*(*zz.data).borrow(), 10.0);
+        assert_eq!(zz.get_data(), 10.0);
         let zz = 1.0 + zz;
-        assert_eq!(*(*zz.data).borrow(), 11.0);
+        assert_eq!(zz.get_data(), 11.0);
         zz.backward();
         println!(" z:{:#?}", zz);
-        assert_eq!(*(*x.clone().grad).borrow(), 1.0);
-        assert_eq!(*(*y.clone().grad).borrow(), 1.0);
+        assert_eq!(x.get_grad(), 1.0);
+        assert_eq!(y.get_grad(), 1.0);
     }
 }

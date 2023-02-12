@@ -6,11 +6,11 @@ use std::sync::Arc;
 
 #[derive(Clone)]
 pub struct Value {
-    pub data: Rc<RefCell<f64>>,
-    pub grad: Rc<RefCell<f64>>,
+    data: Rc<RefCell<f64>>,
+    grad: Rc<RefCell<f64>>,
     pub _prev: Vec<Arc<Value>>,
-    pub _op: Rc<String>,
-    pub _label: RefCell<String>,
+    _op: Rc<String>,
+    _label: RefCell<String>,
     pub _backward: Arc<Box<dyn Fn(&Value)>>,
 }
 
@@ -161,8 +161,8 @@ mod test {
         println!("Before f:{:#?}", f);
         f.backward();
         println!("After f:{:#?}", f);
-        assert_eq!(*(*a.clone().grad).borrow(), -3.0);
-        assert_eq!(*(*b.clone().grad).borrow(), -8.0);
+        assert_eq!(a.get_grad(), -3.0);
+        assert_eq!(b.get_grad(), -8.0);
     }
 
     #[test]
@@ -173,26 +173,26 @@ mod test {
         let e = a.clone() * b.clone();
         e.set_label("e");
         println!(" e {:#?}", *(*e.data).borrow());
-        assert_eq!(*(*e.data).borrow(), -6.0);
+        assert_eq!(e.get_data(), -6.0);
         let d = e.clone() + c.clone();
         d.set_label("d");
         println!(" d {:#?}", *(*d.data).borrow());
-        assert_eq!(*(*d.data).borrow(), 4.0);
+        assert_eq!(d.get_data(), 4.0);
         let f = Value::new(2.0, vec![], "".to_string(), "f".to_string());
         let L = d.clone() * f.clone();
-        assert_eq!(*(*L.data).borrow(), 8.0);
+        assert_eq!(L.get_data(), 8.0);
         println!(" L {:#?}", *(*L.data).borrow());
         L.set_label("L");
         // println!(" {:#?}", L);
         L.backward();
         println!(" {:#?}", L);
 
-        assert_eq!(*(*a.clone().grad).borrow(), -6.0);
-        assert_eq!(*(*b.clone().grad).borrow(), 4.0);
-        assert_eq!(*(*c.clone().grad).borrow(), 2.0);
-        assert_eq!(*(*d.clone().grad).borrow(), 2.0);
-        assert_eq!(*(*e.clone().grad).borrow(), 2.0);
-        assert_eq!(*(*f.clone().grad).borrow(), 4.0);
+        assert_eq!(a.get_grad(), -6.0);
+        assert_eq!(b.get_grad(), 4.0);
+        assert_eq!(c.get_grad(), 2.0);
+        assert_eq!(d.get_grad(), 2.0);
+        assert_eq!(e.get_grad(), 2.0);
+        assert_eq!(f.get_grad(), 4.0);
     }
 
     #[test]
@@ -223,22 +223,10 @@ mod test {
         // o.grad.set(1.0);
         o.backward();
         println!(" {:#?}", o);
-        assert_eq!(
-            f64::trunc(*(*x1.clone().grad).borrow() * 100.0) / 100.0,
-            -1.50
-        );
-        assert_eq!(
-            f64::trunc(*(*w1.clone().grad).borrow() * 100.0) / 100.0,
-            1.00
-        );
-        assert_eq!(
-            f64::trunc(*(*x2.clone().grad).borrow() * 100.0) / 100.0,
-            0.50
-        );
-        assert_eq!(
-            f64::trunc(*(*w2.clone().grad).borrow() * 100.0) / 100.0,
-            0.0
-        );
+        assert_eq!(f64::trunc(x1.get_grad() * 100.0) / 100.0, -1.50);
+        assert_eq!(f64::trunc(w1.get_grad() * 100.0) / 100.0, 1.00);
+        assert_eq!(f64::trunc(x2.get_grad() * 100.0) / 100.0, 0.50);
+        assert_eq!(f64::trunc(w2.get_grad() * 100.0) / 100.0, 0.0);
     }
 
     #[test]
@@ -267,10 +255,7 @@ mod test {
         let ee = e.exp();
         let o = (ee.clone() - 1.0) / (ee.clone() + 1.0);
 
-        assert_eq!(
-            f64::trunc(*(*o.clone().data).borrow() * 1000.0) / 1000.0,
-            0.707
-        );
+        assert_eq!(f64::trunc(o.get_data() * 1000.0) / 1000.0, 0.707);
 
         o.set_label("exp");
         println!(" {:#?}", o);
@@ -278,22 +263,10 @@ mod test {
         o.backward();
         println!(" {:#?}", o);
 
-        assert_eq!(
-            f64::trunc(*(*x1.clone().grad).borrow() * 100.0) / 100.0,
-            -1.50
-        );
-        assert_eq!(
-            f64::trunc(*(*w1.clone().grad).borrow() * 100.0) / 100.0,
-            1.00
-        );
-        assert_eq!(
-            f64::trunc(*(*x2.clone().grad).borrow() * 100.0) / 100.0,
-            0.50
-        );
-        assert_eq!(
-            f64::trunc(*(*w2.clone().grad).borrow() * 100.0) / 100.0,
-            0.0
-        );
+        assert_eq!(f64::trunc(x1.get_grad() * 100.0) / 100.0, -1.50);
+        assert_eq!(f64::trunc(w1.get_grad() * 100.0) / 100.0, 1.00);
+        assert_eq!(f64::trunc(x2.get_grad() * 100.0) / 100.0, 0.50);
+        assert_eq!(f64::trunc(w2.get_grad() * 100.0) / 100.0, 0.0);
     }
 
     #[test]
@@ -326,28 +299,28 @@ mod test {
         oo.backward();
         println!(" {:#?}", oo);
         assert_eq!(
-            f64::trunc(*(*o.data).borrow() * 100.0) / 100.0,
-            f64::trunc(*(*oo.data).borrow() * 100.0) / 100.0
+            f64::trunc(o.get_data() * 100.0) / 100.0,
+            f64::trunc(oo.get_data() * 100.0) / 100.0
         );
         assert_eq!(
-            f64::trunc(*(*o.grad).borrow() * 100.0) / 100.0,
-            f64::trunc(*(*oo.grad).borrow() * 100.0) / 100.0
+            f64::trunc(o.get_grad() * 100.0) / 100.0,
+            f64::trunc(oo.get_grad() * 100.0) / 100.0
         );
         assert_eq!(
-            f64::trunc(*(*x1.grad).borrow() * 100.0) / 100.0,
-            f64::trunc(*(*xx1.grad).borrow() * 100.0) / 100.0
+            f64::trunc(x1.get_grad() * 100.0) / 100.0,
+            f64::trunc(xx1.get_grad() * 100.0) / 100.0
         );
         assert_eq!(
-            f64::trunc(*(*x2.grad).borrow() * 100.0) / 100.0,
-            f64::trunc(*(*xx2.grad).borrow() * 100.0) / 100.0
+            f64::trunc(x2.get_grad() * 100.0) / 100.0,
+            f64::trunc(xx2.get_grad() * 100.0) / 100.0
         );
         assert_eq!(
-            f64::trunc(*(*x1.grad).borrow() * 1000000.0) / 1000000.0,
-            f64::trunc(*(*xx1.grad).borrow() * 1000000.0) / 1000000.0
+            f64::trunc(x1.get_grad() * 1000000.0) / 1000000.0,
+            f64::trunc(xx1.get_grad() * 1000000.0) / 1000000.0
         );
         assert_eq!(
-            f64::trunc(*(*x2.grad).borrow() * 1000000.0) / 1000000.0,
-            f64::trunc(*(*xx2.grad).borrow() * 1000000.0) / 1000000.0
+            f64::trunc(x2.get_grad() * 1000000.0) / 1000000.0,
+            f64::trunc(xx2.get_grad() * 1000000.0) / 1000000.0
         );
     }
 }

@@ -5,24 +5,24 @@ use std::sync::Arc;
 fn tanh_backward(out: &Value) {
     let x = out._prev.get(0).unwrap();
 
-    let mut grad_x = (*x.grad).borrow_mut();
-    let t = *(*out.data).borrow();
-    let grad_out = *(*out.grad).borrow();
+    let t = out.get_data();
+    let grad_out = out.get_grad();
 
     let grad = 1.0 - ((t * t) * grad_out);
-    *grad_x += grad;
+
+    x.set_grad(x.get_grad() + grad);
 
     debug!(
         "tan_backwards({}) label {} grad {}",
-        out._label.borrow(),
-        x._label.borrow(),
-        grad_x
+        out.get_label(),
+        x.get_label(),
+        x.get_grad()
     );
 }
 
 impl Value {
     pub fn tanh(self) -> Value {
-        let x = *(*self.data).borrow();
+        let x = self.get_data();
         let tanh = f64::tanh(x);
         let mut out = Value::new(
             tanh,
