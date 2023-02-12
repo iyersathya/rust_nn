@@ -89,7 +89,7 @@ mod test {
         let ys = [1.0, -1.0, -1.0, 1.0];
         let mut loss_v = vec![];
         let mut ypred: Vec<Value> = vec![];
-        for i in 0..100 {
+        for i in 0..200 {
             ypred = xs.iter().map(|x| mlp.call(x)).collect();
 
             // loss = sum( (yout - ygt)**2 for ygt,yout in zip(ys,ypred))

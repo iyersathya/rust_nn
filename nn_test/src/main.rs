@@ -1,7 +1,7 @@
 use nn::mlp::mlp::MLP;
 use nn::mlp::module::Module;
 use nn::tensor::value::Value;
-use nn_test::moon_data::{get_X, get_Y};
+use nn_test::moon_data::{get_x, get_y};
 use rand::seq::IteratorRandom;
 
 fn loss(X: &[[f64; 2]; 100], y: &[f64], model: &MLP, batch_size: usize) -> (Value, f64) {
@@ -63,11 +63,12 @@ fn loss(X: &[[f64; 2]; 100], y: &[f64], model: &MLP, batch_size: usize) -> (Valu
 }
 
 fn main() {
-    let model = MLP::new(2, &[8, 8, 1]);
+    let batch_size = 32;
+    let model = MLP::new(2, &[16, 8, 8, 1]);
     println!("number of parameters {}", model.parameters().len());
-    let X = get_X();
-    let Y = get_Y();
-    let total_loss = loss(&X, &Y, &model, 12);
+    let X = get_x();
+    let Y = get_y();
+    let total_loss = loss(&X, &Y, &model, batch_size);
     print!(
         "total_loss : {:?},{}",
         total_loss.0.get_data(),
@@ -77,7 +78,7 @@ fn main() {
     // optimization loop
     for i in 0..100 {
         // Step1: Forward
-        let (total_loss, acc) = loss(&X, &Y, &model, 32);
+        let (total_loss, acc) = loss(&X, &Y, &model, batch_size);
 
         // Step2: backward
         model.zero_grad();

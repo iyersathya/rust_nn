@@ -12,7 +12,7 @@ impl Layer {
         Layer {
             neurons: Rc::new(
                 (0..nout)
-                    .map(|l| Neuron::new(nin, nonlin, l as f64 + 0.1))
+                    .map(|l| Neuron::new(nin, nonlin, l as f64 + 3.0))
                     .collect(),
             ),
         }

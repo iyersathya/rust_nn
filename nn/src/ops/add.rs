@@ -44,6 +44,7 @@ impl Add<Value> for Value {
         self.add(other)
     }
 }
+
 impl AddAssign<Value> for Value {
     fn add_assign(&mut self, other: Self) {
         self.set_data(self.get_data() + other.get_data());
