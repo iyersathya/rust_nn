@@ -16,9 +16,10 @@ This follows standard building command for Rust.
 
 main.rs contains a model trained on make_moons (dataset is in [moon_data.rs](https://github.com/iyersathya/rust_nn/blob/main/nn_test/src/moon_data.rs) ) data from sklearn.datasets
 
-Command to run training
+Command to run training 
 ```
-cargo run
+cargo run (debug slow)
+time cargo run --release (release fast)
 ```
 Output of training MLP model for moon data
 ```
