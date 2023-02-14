@@ -22,12 +22,7 @@ impl MLP {
         MLP { layers }
     }
     pub fn call(&self, x: &[f64]) -> Value {
-        let mut y: Vec<Value> = x
-            .to_vec()
-            .iter()
-            .map(|v| Value::new(*v, vec![], "".to_string(), "b".to_string()))
-            .collect();
-
+        let mut y = Value::vec(x);
         for layer in self.layers.iter() {
             y = layer.call(&y);
         }

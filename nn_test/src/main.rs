@@ -35,6 +35,7 @@ fn loss(X: &[[f64; 2]; 100], y: &[f64], model: &MLP, batch_size: usize) -> (Valu
         .sum();
 
     let data_loss = losses / yb.len() as f64;
+
     let alpha = 1e-4;
     let reg_loss = alpha
         * model
@@ -78,14 +79,16 @@ fn main() {
 
     // optimization loop
     for i in 0..100 {
-        // Step1: Forward
+        // Step 1: Forward
         let (total_loss, acc) = loss(&X, &Y, &model, batch_size);
 
-        // Step2: backward
+        // Step 2: backward
         model.zero_grad();
         total_loss.backward();
+
         // update params using SGD
         let learning_rate = 1.0 - (0.9 * i as f64) / 100.0;
+
         // let learning_rate = 0.0;
         model.parameters().iter().for_each(|p| {
             let data = p.get_data() - (learning_rate * p.get_grad());
