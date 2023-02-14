@@ -28,13 +28,13 @@ fn loss(X: &[[f64; 2]; 100], y: &[f64], model: &MLP, batch_size: usize) -> (Valu
     let inputs = xb;
     let scores: Vec<Value> = inputs.iter().map(|input| model.call(input)).collect();
 
-    let losses: Value = y
+    let losses: Value = yb
         .iter()
         .zip(scores.iter())
         .map(|(&yi, scorei)| (1.0 + scorei.clone() * (yi * -1.0)).relu())
         .sum();
 
-    let data_loss = losses / y.len() as f64;
+    let data_loss = losses / yb.len() as f64;
     let alpha = 1e-4;
     let reg_loss = alpha
         * model
@@ -45,11 +45,11 @@ fn loss(X: &[[f64; 2]; 100], y: &[f64], model: &MLP, batch_size: usize) -> (Valu
 
     let total_loss = data_loss + reg_loss;
 
-    let accuracy: Vec<f64> = y
+    let accuracy: Vec<f64> = yb
         .iter()
         .zip(scores.iter())
         .map(|(&yi, scorei)| {
-            if ((yi > 0.0) == (scorei.get_data() > 0.0)) {
+            if ((*yi > 0.0) == (scorei.get_data() > 0.0)) {
                 1.0
             } else {
                 0.0
@@ -64,7 +64,8 @@ fn loss(X: &[[f64; 2]; 100], y: &[f64], model: &MLP, batch_size: usize) -> (Valu
 
 fn main() {
     let batch_size = 32;
-    let model = MLP::new(2, &[16, 8, 8, 1]);
+    // let model = MLP::new(2, &[16, 8, 8, 1]);
+    let model = MLP::new(2, &[16, 16, 1]);
     println!("number of parameters {}", model.parameters().len());
     let X = get_x();
     let Y = get_y();
