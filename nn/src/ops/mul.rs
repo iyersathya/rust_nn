@@ -1,8 +1,8 @@
 use crate::tensor::value::Value;
 use log::debug;
 use std::ops::{Mul, MulAssign};
+use std::rc::Rc;
 use std::sync::Arc;
-
 fn mul_backward(out: &Value) {
     let x = out._prev.get(0).unwrap();
     let y = out._prev.get(1).unwrap();
@@ -31,7 +31,7 @@ impl Value {
             "*".to_string(),
             "".to_string(),
         );
-        out._backward = Arc::new(Box::new(mul_backward));
+        out._backward = Rc::new(mul_backward);
         out
     }
 }
@@ -62,7 +62,7 @@ impl MulAssign<Value> for Value {
         self.set_data(self.get_data() * other.get_data());
         self.set_grad(self.get_grad() * other.get_grad());
 
-        self._backward = Arc::new(Box::new(mul_backward));
+        self._backward = Rc::new(mul_backward);
     }
 }
 

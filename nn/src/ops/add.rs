@@ -1,6 +1,7 @@
 use crate::tensor::value::Value;
 use log::debug;
 use std::ops::{Add, AddAssign};
+use std::rc::Rc;
 use std::sync::Arc;
 
 fn add_backward(out: &Value) {
@@ -32,7 +33,7 @@ impl Value {
             "+".to_string(),
             "".to_string(),
         );
-        out._backward = Arc::new(Box::new(add_backward));
+        out._backward = Rc::new(add_backward);
         out
     }
 }
@@ -49,7 +50,7 @@ impl AddAssign<Value> for Value {
     fn add_assign(&mut self, other: Self) {
         self.set_data(self.get_data() + other.get_data());
         self.set_grad(self.get_grad() + other.get_grad());
-        self._backward = Arc::new(Box::new(add_backward));
+        self._backward = Rc::new(add_backward); //Arc::new(Box::new(add_backward));
     }
 }
 impl Add<f64> for Value {

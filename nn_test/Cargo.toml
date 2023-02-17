@@ -8,3 +8,5 @@ edition = "2021"
 [dependencies]
 nn = { path = "../nn" }
 rand ={workspace = true}
+flame = {workspace = true}
+flamegraph = {workspace = true}

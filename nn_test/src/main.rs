@@ -1,3 +1,4 @@
+use flame;
 use nn::mlp::mlp::MLP;
 use nn::mlp::module::Module;
 use nn::tensor::value::Value;
@@ -76,9 +77,10 @@ fn main() {
         total_loss.0.get_data(),
         total_loss.1
     );
-
+    // flame::start("my_program");
     // optimization loop
     for i in 0..100 {
+        // flame::start_guard("loss");
         // Step 1: Forward
         let (total_loss, acc) = loss(&X, &Y, &model, batch_size);
 
@@ -103,4 +105,5 @@ fn main() {
             )
         }
     }
+    // flame::end("my_program");
 }

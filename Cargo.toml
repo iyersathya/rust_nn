@@ -8,3 +8,5 @@ members = [
 log = "^0.4.17"
 rand = "0.8.5"
 env_logger = "0.10.0"
+flame = "0.2.2"
+flamegraph = "0.6.2"

@@ -1,8 +1,8 @@
 use crate::tensor::value::Value;
 use log::debug;
 use std::ops::{Neg, Sub, SubAssign};
+use std::rc::Rc;
 use std::sync::Arc;
-
 fn sub_backward(out: &Value) {
     let x = out._prev.get(0).unwrap();
     let y = out._prev.get(1).unwrap();
@@ -43,7 +43,7 @@ impl SubAssign<Value> for Value {
         self.set_data(self.get_data() - other.get_data());
         self.set_grad(self.get_grad() - other.get_grad());
 
-        self._backward = Arc::new(Box::new(sub_backward));
+        self._backward = Rc::new(sub_backward);
     }
 }
 impl Sub<f64> for Value {

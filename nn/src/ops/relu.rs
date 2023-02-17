@@ -1,7 +1,7 @@
 use crate::tensor::value::Value;
 use log::debug;
+use std::rc::Rc;
 use std::sync::Arc;
-
 fn relu_backward(out: &Value) {
     let x = out._prev.get(0).unwrap();
     let t = out.get_data();
@@ -27,7 +27,7 @@ impl Value {
             "relu".to_string(),
             "".to_string(),
         );
-        out._backward = Arc::new(Box::new(relu_backward));
+        out._backward = Rc::new(relu_backward);
         out
     }
 }

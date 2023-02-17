@@ -1,7 +1,7 @@
 use crate::tensor::value::Value;
 use log::debug;
+use std::rc::Rc;
 use std::sync::Arc;
-
 fn exp_backward(out: &Value) {
     let x = out._prev.get(0).unwrap();
 
@@ -25,7 +25,7 @@ impl Value {
             "tanh".to_string(),
             "".to_string(),
         );
-        out._backward = Arc::new(Box::new(exp_backward));
+        out._backward = Rc::new(exp_backward); //Arc::new(Box::new(exp_backward));
         out
     }
 }

@@ -1,5 +1,6 @@
 use crate::tensor::value::Value;
 use log::debug;
+use std::rc::Rc;
 use std::sync::Arc;
 
 fn pow_backward(out: &Value) {
@@ -31,7 +32,7 @@ impl Value {
             "^".to_string(),
             "".to_string(),
         );
-        out._backward = Arc::new(Box::new(pow_backward));
+        out._backward = Rc::new(pow_backward);
         out
     }
     pub fn powf(self, other: f64) -> Value {
