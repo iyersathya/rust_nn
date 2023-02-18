@@ -1,7 +1,5 @@
 use std::cell::RefCell;
-use std::collections::HashMap;
 use std::fmt;
-use std::hash::{Hash, Hasher};
 use std::iter::Sum;
 use std::rc::Rc;
 use std::sync::Arc;
@@ -91,14 +89,10 @@ impl Value {
 
     pub fn backward(&self) {
         let mut topo = vec![];
-        let mut visited: HashMap<&Value, bool> = HashMap::new();
-        fn build_topo<'a>(
-            v: &'a Value,
-            topo: &mut Vec<&'a Value>,
-            visited: &mut HashMap<&'a Value, bool>,
-        ) {
-            if !visited.contains_key(&v) {
-                visited.insert(v, false);
+        let mut visited = vec![];
+        fn build_topo<'a>(v: &'a Value, topo: &mut Vec<&'a Value>, visited: &mut Vec<&'a Value>) {
+            if !visited.contains(&v) {
+                visited.push(v);
                 for child in v._prev.iter() {
                     build_topo(child, topo, visited);
                 }
@@ -114,22 +108,13 @@ impl Value {
     }
 }
 
-impl Eq for Value {}
-
 impl PartialEq for Value {
     fn eq(&self, other: &Self) -> bool {
         *(*self.data).borrow() == *(*other.data).borrow()
-            // && *(*self.grad).borrow() == *(*other.grad).borrow()
+            && *(*self.grad).borrow() == *(*other.grad).borrow()
             && self._prev == other._prev
-        // && self._op == other._op
-        // && self._label == other._label
-    }
-}
-impl Hash for Value {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        state.write_i32((self.get_data() * 1000.0) as i32);
-        // state.write_i32((self.get_grad() * 1000.0) as i32);
-        state.finish();
+            && self._op == other._op
+            && self._label == other._label
     }
 }
 
