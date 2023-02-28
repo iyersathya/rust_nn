@@ -2,8 +2,8 @@ use flame;
 use nn::mlp::mlp::MLP;
 use nn::mlp::module::Module;
 use nn::tensor::value::Value;
-use nn_test::moon_data::{get_x, get_y};
 use rand::seq::IteratorRandom;
+use sample_app_moon_ds::moon_data::{get_x, get_y};
 
 fn loss(X: &[[f64; 2]; 100], y: &[f64], model: &MLP, batch_size: usize) -> (Value, f64) {
     let ri: Vec<usize> = (0..X.len())

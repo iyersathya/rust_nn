@@ -1,5 +1,5 @@
 [package]
-name = "nn_test"
+name = "sample_app_moon_ds"
 version = "0.1.0"
 edition = "2021"
 

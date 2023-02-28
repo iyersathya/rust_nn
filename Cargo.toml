@@ -1,7 +1,7 @@
 [workspace]
 members = [
   "nn",
-  "nn_test"
+  "sample_app_moon_ds"
 ]
 
 [workspace.dependencies]
